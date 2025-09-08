@@ -20,7 +20,7 @@ export default function Nav() {
 					{session.user?.name}
 				</Link>
 			) : (
-				<Link href="/api/auth/signin">Lign</Link>
+				<Link href="/sign">Login</Link>
 			)}
 		</div>
 	);
