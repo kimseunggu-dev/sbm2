@@ -1,5 +1,5 @@
 import NextAuth from 'next-auth';
-import Credentials from 'next-auth/providers/credentials';
+import credentials from 'next-auth/providers/credentials';
 import Github from 'next-auth/providers/github';
 import Google from 'next-auth/providers/google';
 import Kakao from 'next-auth/providers/kakao';
@@ -16,46 +16,42 @@ export const {
     Google,
     Kakao,
     Naver,
-    Credentials({
-      name: 'Email',
+    credentials({
       credentials: {
-        email: {
-          label: 'Email',
-          type: 'email',
-          placeholder: 'email@bookmark.com',
-        },
-        password: {
-          label: 'Password',
-          type: 'password',
-          placeholder: 'password..'
-        },
+        email: {},
+        password: {},
       },
       async authorize(credentials) {
-        if (!credentials || !credentials.email || !credentials.password)
-          return null;
-
-        const user = { id: '1', email: 'aaa@gmail.com', name: 'Hong' };
-        return user;
+        return null;
       },
     }),
   ],
   callbacks: {
-    async signIn({ user, profile }) {
+    async signIn({ user, profile, account }) {
+      const isCredential = account?.provider === "credentials"
       console.log(user);
       console.log(profile);
+      console.log(isCredential);
+      // const { email, name, image } = user;
+      // if (!email) return false;
+      // return false;
       return true;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, account, session }) {
+      const userData = trigger === "update" ? session : user;
       // jwt 방식
-      if (user) {
-        token.id = user.id;
-        token.email = user.email;
-        token.name = user.name;
+      if (userData) {
+        token.id = userData.id;
+        token.email = userData.email;
+        token.name = userData.name || userData.nickname;
       }
       return token;
     },
     async session({ session, token }) {
       if (token) {
+        session.user.id = token.id?.toString() || "";
+        session.user.name = token.name;
+        session.user.email = token.email as string;
       }
       return session;
     },
@@ -64,11 +60,10 @@ export const {
   trustHost: true,
   jwt: { maxAge: 30 * 60 },
   pages: {
-    // signIn: `/sign`,
+    signIn: `/sign`,
     error: '/sign/error',
   },
   session: {
     strategy: 'jwt'
   },
-  secret: process.env.AUTH_SECRET as string,
 });
