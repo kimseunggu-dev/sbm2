@@ -21,25 +21,25 @@ export const {
     credentials({
       credentials: {
         email: {},
-        password: {},
+        passwd: {},
       },
       async authorize(credentials) {
         console.log(credentials);
-        const { email, password } = credentials;
+        const { email, passwd } = credentials;
 
         const validator = z
           .object({
             email: z.email("잘못된 이메일 형식입니다."),
-            password: z.string().min(6, "More than 6 characters!"),
+            passwd: z.string().min(6, "More than 6 characters!"),
           })
-          .safeParse({ email, password });
+          .safeParse({ email, passwd });
 
         if (!validator.success) {
           console.log("Error", validator.error);
           throw new AuthError(validator.error.message);
         }
 
-        return { email, password } as User;
+        return { email, passwd } as User;
       },
     }),
   ],
