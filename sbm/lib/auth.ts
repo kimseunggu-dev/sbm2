@@ -54,6 +54,9 @@ export const {
       if (!email) return false;
 
       const mbr = await findMemberByEmail(email, isCredential);
+      if (mbr?.emailcheck) {
+        return `/sign/error?error=CheckEmail&email=${email}`;
+      }
       if (isCredential) {
         if (!mbr) throw new AuthError("NotExistsMember");
         // 암호 비교(compare) ==> 실패하면 오류, 성공하면 로그인
