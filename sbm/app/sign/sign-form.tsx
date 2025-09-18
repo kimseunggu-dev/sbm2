@@ -35,10 +35,10 @@ function SignIn({ toggleSign }: { toggleSign: () => void }) {
 		undefined,
 	);
 
-	const makeLoginAction = (formData: FormData) => {
-		if (redirectTo) formData.set("redirectTo", redirectTo);
-		makeLogin(formData);
-	};
+	// const makeLoginAction = (formData: FormData) => {
+	// 	if (redirectTo) formData.set("redirectTo", redirectTo);
+	// 	makeLogin(formData);
+	// };
 
 	useEffect(() => {
 		if (email) {
@@ -49,7 +49,9 @@ function SignIn({ toggleSign }: { toggleSign: () => void }) {
 	return (
 		<>
 			<form action={makeLogin} className="flex flex-col space-y-3">
-				<input type="hidden" name="redirect" />
+				{redirectTo && (
+					<input type="hidden" name="redirectTo" value={redirectTo} />
+				)}
 				<LabelInput
 					label="email"
 					type="email"
