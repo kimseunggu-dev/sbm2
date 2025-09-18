@@ -30,8 +30,11 @@ export const authorize = async (
   if (err) return err;
 
   try {
+    const redirectTo = formData.get("redirectTo")?.toString() || "/bookcase";
+    console.log("🚀 ~ authorize ~ redirectTo:", redirectTo)
+
     // await signIn("credentials", formData);
-    await signIn('credentials', { ...data, redirectTo: '/bookcase' });
+    await signIn("credentials", { ...data, redirectTo });
   } catch (error) {
     console.log('🚀 sign.action.authorize - error:', error);
     throw error;
