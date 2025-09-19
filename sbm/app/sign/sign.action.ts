@@ -8,6 +8,7 @@ import { signIn, signOut } from "@/lib/auth";
 import prisma from "@/lib/db";
 import { newToken } from "@/lib/utils";
 import { type ValidError, validate } from "@/lib/validator";
+import type { SendMailBody } from "../api/sendmail/route";
 
 export type Provider = "google" | "github" | "naver" | "kakao";
 
@@ -102,13 +103,55 @@ export const regist = async (
     data: { email, nickname, passwd, emailcheck },
   });
 
+  sendmailByFetch({ email, emailcheck });
+
+  redirect(`/sign/error?error=CheckEmail&email=${email}`);
+};
+
+export const resendResetPassword = async (
+  _: ValidError | undefined,
+  formData: FormData
+) => {
+  const zobj = z.object({
+    email: z.email(),
+    emailcheck: z.uuidv4(),
+  });
+  const [err, data] = validate(zobj, formData);
+  if (err) return err;
+
+  const { email, emailcheck } = data;
+  const mbr = await findMemberByEmail(email);
+  if (!mbr || mbr.emailcheck !== emailcheck) {
+    redirect('/sign/error?error=EmailSendFail');
+  }
+
+  const newEmailCheck = newToken();
+  await prisma.member.update({
+    where: { email },
+    data: { emailcheck: newEmailCheck },
+  });
+
+  sendmailByFetch({
+    email,
+    emailcheck: newEmailCheck,
+    emailType: 'reset-password',
+  });
+};
+
+const sendmailByFetch = async ({
+  email,
+  emailcheck,
+  nickname,
+  emailType = 'regist',
+}: SendMailBody) => {
+
   const { NEXT_PUBLIC_URL, INTERNAL_SECRET } = process.env;
   fetch(`${NEXT_PUBLIC_URL}/api/sendmail`, {
     method: 'POST',
     headers: {
       authorization: `Bearer ${INTERNAL_SECRET}`,
     },
-    body: JSON.stringify({ email, emailcheck }),
+    body: JSON.stringify({ email, emailcheck, nickname, emailType }),
   });
   redirect(`/sign/error?error=CheckEmail&email=${email}`);
 };
