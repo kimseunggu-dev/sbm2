@@ -61,7 +61,6 @@ export const {
   callbacks: {
     async signIn({ user, profile, account }) {
       const isCredential = account?.provider === "credentials";
-      console.log(user);
       console.log(profile);
       console.log(isCredential);
       const { email, name: nickname, image } = user;
@@ -70,7 +69,10 @@ export const {
       const mbr = await findMemberByEmail(email, isCredential);
       if (mbr?.emailcheck) {
         // return `/sign/error?error=CheckEmail&email=${email}`;
-        return `/sign/error?error=CheckEmail&email=${email}&oldEmailcheck=${mbr.emailcheck}`;
+        return `/sign/error?error=CheckEmail&email=${email}&Emailcheck=${mbr.emailcheck}`;
+
+
+
 
 
       }

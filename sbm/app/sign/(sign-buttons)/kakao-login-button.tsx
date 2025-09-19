@@ -8,7 +8,7 @@ export function KakaoLoginButton({
 }) {
 	const makeLogin = async () => {
 		"use server";
-		await login("github", redirectTo);
+		await login("kakao", redirectTo);
 	};
 	return (
 		<Button
