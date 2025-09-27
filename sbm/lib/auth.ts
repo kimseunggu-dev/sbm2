@@ -1,6 +1,3 @@
-// import NextAuth, { AuthError, type User } from "next-auth";
-
-// import { compare } from 'bcryptjs';
 import NextAuth, { AuthError } from "next-auth";
 import credentials from "next-auth/providers/credentials";
 import Github from "next-auth/providers/github";
@@ -9,11 +6,6 @@ import Kakao from "next-auth/providers/kakao";
 import Naver from "next-auth/providers/naver";
 import z from "zod";
 import prisma, { findMemberByEmail } from "./db";
-// import { comparePassword } from "./utils";
-// import NextAuth, { AuthError } from 'next-auth';
-// import { findMemberByEmail } from "@/app/sign/sign.action";
-// import prisma from "./db";
-// import { validateObject } from "./validator";
 import { comparePassword, validateObject } from './validator';
 
 export const {
@@ -33,30 +25,16 @@ export const {
         passwd: {},
       },
       async authorize(credentials) {
-        console.log(credentials);
-        // const { email, passwd } = credentials;
-
-        // const validator = z
-        //   .object({
-        //     email: z.email("잘못된 이메일 형식입니다."),
-        //     passwd: z.string().min(6, "More than 6 characters!"),
-        //   })
-        //   .safeParse({ email, passwd });
+        console.log("🚀 ~ authorize ~ credentials:", credentials)
 
         const zobj = z.object({
           email: z.email("Invalid Email Format!"),
           passwd: z.string().min(6, "More than 6 characters!"),
         });
 
-        // if (!validator.success) {
-        //   console.log("Error", validator.error);
-        //   throw new AuthError(validator.error.message);
-        // }
-
         const [err, data] = validateObject(zobj, credentials);
         if (err) return err;
 
-        // return { email, passwd } as User;
         return data;
       },
     }),
@@ -71,18 +49,15 @@ export const {
 
       let mbr = await findMemberByEmail(email, isCredential);
       if (mbr?.emailcheck) {
-        // return `/sign/error?error=CheckEmail&email=${email}`;
         return `/sign/error?error=CheckEmail&email=${email}&Emailcheck=${mbr.emailcheck}`;
       }
       if (isCredential) {
-        // if (!mbr) throw new AuthError("NotExistsMember");
         // 암호 비교(compare) ==> 실패하면 오류, 성공하면 로그인
         if (!mbr) throw authError("Not Exists Member!", "EmailSignInError");
         if (mbr.outdt) throw authError("Withdrawed Member!", "AccessDenied");
         if (!mbr.passwd)
           throw authError("RegistedBySNS", "OAuthAccountNotLinked");
 
-        // const isValidPasswd = await compare(user.passwd ?? '', mbr.passwd);
         const isValidPasswd = await comparePassword(user.passwd, mbr.passwd);
         if (!isValidPasswd)
           throw authError("Invalid Password!", "CredentialsSignin");
@@ -106,8 +81,6 @@ export const {
 
       return true;
     },
-    // async jwt({ token, user, trigger, account, session }) {
-    // if (account) console.log('🚀 ~ account:', account);
     async jwt({ token, user, trigger, session }) {
       const userData = trigger === "update" ? session : user;
       if (userData) {
@@ -116,13 +89,6 @@ export const {
         token.name = userData.name || userData.nickname;
         token.image = userData.image;
         token.isadmin = userData.isadmin;
-
-        // if (account) {
-        //   token.accessToken = account?.access_token;
-        //   token.accessTokenExpires =
-        //     Date.now() + (account.expires_in ?? 0) * 1000;
-        //   token.refreshToken = account.refresh_token;
-        // }
       }
       return token;
     },

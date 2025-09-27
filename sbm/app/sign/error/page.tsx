@@ -22,7 +22,6 @@ export default function AuthError({ searchParams }: Props) {
 			<div className="text-center">
 				<h1 className="mb-5 font-semibold text-2xl">{error}</h1>
 				<div className="mb-10 text-red-500">{getMessage(error)}</div>
-
 				<div className="item-center flex flex-col gap-3">
 					<Button variant={"outline"} asChild={true}>
 						<Link href={`/sign?email=${email}`} className="">

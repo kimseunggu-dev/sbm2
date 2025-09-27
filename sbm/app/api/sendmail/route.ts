@@ -23,6 +23,7 @@ export async function POST(req: NextRequest) {
   }: SendMailBody = await req.json();
 
   const authorization = req.headers.get("authorization");
+
   if (authorization !== `Bearer ${process.env.INTERNAL_SECRET}`)
     throw new Error("InvalidToken");
 

@@ -1,7 +1,7 @@
 "use client";
+
 import Image, { type StaticImageData } from "next/image";
 import { useRouter } from "next/navigation";
-// import type { ValidError } from "@/lib/validator";
 import { useSession } from "next-auth/react";
 import {
 	type ChangeEvent,
@@ -10,24 +10,18 @@ import {
 	useState,
 	useTransition,
 } from "react";
-// import type prisma from "@/lib/db";
 import type { UpdateProfileImageReturn } from "@/app/sign/sign.action";
-// import { cn } from "@/lib/utils";
 import { cn, DummyProfile } from "@/lib/utils";
 
 type Props = {
 	src: string | StaticImageData;
 	alt?: string;
-	// changeImage?: (
-	// 	formData: FormData,
-	// ) => Promise<[ValidError, typeof prisma.member]>;
 	changeImage?: (formData: FormData) => UpdateProfileImageReturn;
 };
 
 export default function ImageUploader({ src, alt, changeImage }: Props) {
 	const { update } = useSession();
 	const router = useRouter();
-
 	const [isDragging, setDragging] = useState(false);
 	const [img, setImg] = useState(src);
 	const formRef = useRef<HTMLFormElement>(null);
@@ -36,17 +30,13 @@ export default function ImageUploader({ src, alt, changeImage }: Props) {
 
 	const setImageFile = (e: ChangeEvent<HTMLInputElement>) => {
 		if (!e.target.files?.length) return;
-		// setPreview(e.target.files[0]);
 		setPreview(e.target.files[0], true);
 	};
 
-	// const setPreview = (file: File) => {
 	const setPreview = (file: File, needSubmit = false) => {
 		const reader = new FileReader();
 		reader.onload = (e) => {
-			// console.log('🚀 ~ e:', e.target?.result);
 			if (e.target) setImg(e.target.result as string);
-			// formRef.current?.requestSubmit();
 			if (needSubmit) formRef.current?.requestSubmit();
 		};
 		reader.readAsDataURL(file);
@@ -59,17 +49,12 @@ export default function ImageUploader({ src, alt, changeImage }: Props) {
 		const formData = new FormData(e.currentTarget);
 		uploadImage(formData);
 	};
+
 	const uploadImage = (formData: FormData) => {
 		setErrorMsgs([]);
 		startTransition(async () => {
-			// const formData = new FormData(e.currentTarget);
-			// const ent = Object.fromEntries(formData.entries());
-			// console.log("🚀 ~ ent:", ent);
 			if (!changeImage) return;
 			const [err, mbr] = await changeImage(formData);
-			// console.log("🚀 ~ err:", err);
-			// console.log("🚀 ~ mbr:", mbr);
-			// if (err) return alert(err);
 			if (err) {
 				console.log("ERROR>>", err, typeof err.image);
 				setImg(src);
@@ -99,7 +84,6 @@ export default function ImageUploader({ src, alt, changeImage }: Props) {
 					setDragging(false);
 					const files = e.dataTransfer.files;
 					if (files?.length) setPreview(files[0]);
-
 					const formData = new FormData();
 					formData.append("image", files[0]);
 					uploadImage(formData);
@@ -118,7 +102,6 @@ export default function ImageUploader({ src, alt, changeImage }: Props) {
 					unoptimized={process.env.NODE_ENV === "development"}
 					onError={() => setImg(DummyProfile)}
 				/>
-
 				<input
 					type="file"
 					name="image"

@@ -193,27 +193,10 @@ const sendmailByFetch = async ({
     },
     body: JSON.stringify({ email, emailcheck, nickname, emailType }),
   });
-  // redirect(`/sign/error?error=CheckEmail&email=${email}`);
 };
 
-// export const findMemberByEmail = async (
-//   email: string,
-//   passwd: boolean = false,
-// ) =>
-//   prisma.member.findUnique({
-//     select: {
-//       id: true,
-//       nickname: true,
-//       isadmin: true,
-//       emailcheck: true,
-//       image: true,
-//       outdt: true,
-//       passwd,
-//     },
-//     where: { email },
-//   });
-
 export type UpdateProfileImageReturn = ReturnType<typeof updateProfileImage>;
+
 export const updateProfileImage = async (formData: FormData) => {
   const session = await auth();
   // if (!session?.user || !session.user.email) return {}; // throw new Error('Need Login!');

@@ -1,6 +1,4 @@
 import { redirect } from "next/navigation";
-// import { findMemberByEmail } from "@/app/sign/sign.action";
-// import prisma from "@/lib/db";
 import prisma, { findMemberByEmail } from "@/lib/db";
 
 type Props = {
@@ -14,6 +12,7 @@ export default async function RegistCheck({ params, searchParams }: Props) {
 
 	const mbr = await findMemberByEmail(email);
 	console.log("🚀 ~ mbr:", mbr);
+
 	if (emailcheck !== mbr?.emailcheck)
 		redirect("/sign/error?error=InvalidEmailCheck");
 

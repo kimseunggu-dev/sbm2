@@ -12,8 +12,8 @@ type Props = {
 		isadmin?: boolean | undefined;
 	} & User;
 };
+
 export default function ChangeProfile({ user }: Props) {
-	// const { update } = useSession({ required: true });
 	const { update } = useSession();
 	const [diffEmail, setDiffEmail] = useState(false);
 
@@ -43,12 +43,14 @@ export default function ChangeProfile({ user }: Props) {
 				type="password"
 				placeholder="current password..."
 			/>
+
 			<LabelInput
 				label="New Password"
 				name="passwd"
 				type="password"
 				placeholder="new password..."
 			/>
+
 			<LabelInput
 				label="New Password Confirm"
 				name="passwd2"

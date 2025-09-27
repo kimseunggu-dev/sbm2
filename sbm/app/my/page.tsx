@@ -1,5 +1,3 @@
-// "use client";
-
 import { FileOutputIcon } from "lucide-react";
 import { redirect } from "next/navigation";
 import { use } from "react";
@@ -27,7 +25,6 @@ export default function My() {
 							alt={name}
 							changeImage={updateProfileImage}
 						/>
-
 						<div>
 							<SignOutButton name={name} />
 							<Button variant={"destructive"} className="mt-3 w-full">
@@ -35,7 +32,6 @@ export default function My() {
 							</Button>
 						</div>
 					</div>
-
 					<div className="col-span-2 border p-3">
 						<ChangeProfile user={session.user} />
 					</div>
