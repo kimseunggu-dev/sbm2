@@ -32,6 +32,7 @@ export default function ResetPasswd({ email, emailcheck }: Props) {
 				error={validError}
 				placeholder="new password..."
 			/>
+
 			<LabelInput
 				label="new password confirm"
 				name="passwd2"
