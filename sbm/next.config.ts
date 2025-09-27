@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
       { hostname: 'phinf.pstatic.net' },
       { hostname: '*.kakaocdn.net' },
       { hostname: 'sbm.topician.com' },
-      { hostname: 'localhost' },
+      { hostname: 'localhost', port: '3000', protocol: 'http' },
     ],
   },
 };

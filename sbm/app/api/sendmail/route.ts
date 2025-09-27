@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { sendPasswordReset, sendRegistCheck } from "@/app/sign/mail.action";
+import { newToken } from "@/lib/utils";
 
 export type SendMailBody = {
   email: string;
@@ -7,6 +8,10 @@ export type SendMailBody = {
   nickname?: string;
   emailType?: "regist" | "reset-password";
 };
+
+export function GET() {
+  return NextResponse.json({ token: newToken() })
+}
 
 // POST /api/sendmail
 export async function POST(req: NextRequest) {
