@@ -21,13 +21,11 @@ export default function Nav() {
 			{didLogin ? (
 				<Link
 					href="/my"
-					className="w-[40px] h-[40px] overflow-hidden rounded-full border"
+					className="relative h-[40px] w-[40px] overflow-hidden rounded-full border"
 				>
 					<Image
 						src={session.user?.image || DummyProfile}
 						alt={session.user?.name || "guest"}
-						// width={40}
-						// height={40}
 						unoptimized={process.env.NODE_ENV === "development"}
 						fill
 					/>
