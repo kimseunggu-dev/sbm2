@@ -4,7 +4,9 @@ import Link from "next/link";
 import { use } from "react";
 import ThemeChanger from "@/components/theme-changer";
 import { auth } from "@/lib/auth";
-import DummyProfile from "@/public/profile_dummy.png";
+// import DummyProfile from "@/public/profile_dummy.png";
+import { DummyProfile } from "@/lib/utils";
+import { existsFile } from "@/lib/validator";
 
 export default function Nav() {
 	const session = use(auth());
@@ -24,7 +26,8 @@ export default function Nav() {
 					className="relative h-[40px] w-[40px] overflow-hidden rounded-full border"
 				>
 					<Image
-						src={session.user?.image || DummyProfile}
+						// src={session.user?.image || DummyProfile}
+						src={existsFile(session.user?.image) || DummyProfile}
 						alt={session.user?.name || "guest"}
 						unoptimized={process.env.NODE_ENV === "development"}
 						fill

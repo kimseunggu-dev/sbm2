@@ -12,7 +12,8 @@ import {
 } from "react";
 // import type prisma from "@/lib/db";
 import type { UpdateProfileImageReturn } from "@/app/sign/sign.action";
-import { cn } from "@/lib/utils";
+// import { cn } from "@/lib/utils";
+import { cn, DummyProfile } from "@/lib/utils";
 
 type Props = {
 	src: string | StaticImageData;
@@ -115,6 +116,7 @@ export default function ImageUploader({ src, alt, changeImage }: Props) {
 					className="rounded-full border"
 					fill
 					unoptimized={process.env.NODE_ENV === "development"}
+					onError={() => setImg(DummyProfile)}
 				/>
 
 				<input

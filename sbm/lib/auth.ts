@@ -9,11 +9,12 @@ import Kakao from "next-auth/providers/kakao";
 import Naver from "next-auth/providers/naver";
 import z from "zod";
 import prisma, { findMemberByEmail } from "./db";
-import { comparePassword } from "./utils";
+// import { comparePassword } from "./utils";
 // import NextAuth, { AuthError } from 'next-auth';
 // import { findMemberByEmail } from "@/app/sign/sign.action";
 // import prisma from "./db";
-import { validateObject } from "./validator";
+// import { validateObject } from "./validator";
+import { comparePassword, validateObject } from './validator';
 
 export const {
   handlers: { GET, POST },
