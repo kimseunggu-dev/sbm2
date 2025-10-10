@@ -83,6 +83,7 @@ export const {
     },
     async jwt({ token, user, trigger, session }) {
       const userData = trigger === "update" ? session : user;
+      if (trigger === 'update') console.log('🚀 update - userData:', userData);
       if (userData) {
         token.id = userData.id;
         token.email = userData.email;
