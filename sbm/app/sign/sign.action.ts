@@ -1,22 +1,22 @@
 "use server";
 
+import { hash } from "bcryptjs";
+import { existsSync, mkdirSync } from "fs";
+import { writeFile } from "fs/promises";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { AuthError } from "next-auth";
+import path from "path";
+import z from "zod";
 import { auth, signIn, signOut } from "@/lib/auth";
 import prisma, { findMemberByEmail } from "@/lib/db";
 import { newToken, uniqId, uniqNumId } from "@/lib/utils";
 import {
   comparePassword,
   existsEmail,
-  validate,
   type ValidError,
+  validate,
 } from "@/lib/validator";
-import { hash } from "bcryptjs";
-import { existsSync, mkdirSync } from "fs";
-import { writeFile } from "fs/promises";
-import { AuthError } from "next-auth";
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
-import path from "path";
-import z from "zod";
 import type { SendMailBody } from "../api/sendmail/route";
 
 export type Provider = "google" | "github" | "naver" | "kakao";
@@ -268,7 +268,7 @@ export const sendEmailChangeCode_일괄저장 = async (formData: FormData) => {
       });
     },
     // 5000, // QQQ: 2 * 60 * 1000
-    2 * 60 * 1000
+    2 * 60 * 1000,
   );
 
   await sendmailByFetch({
@@ -326,7 +326,7 @@ export const updateProfileImage = async (formData: FormData) => {
 
 export const updateNickname = async (formData: FormData) => {
   const session = await auth();
-  if (!session?.user || !session.user.email) throw new Error('Need Login!');
+  if (!session?.user || !session.user.email) throw new Error("Need Login!");
 
   const { email } = session.user;
 
@@ -342,16 +342,16 @@ export const updateNickname = async (formData: FormData) => {
     where: { email },
     data: { nickname },
   });
-  console.log('🚀 ~ mbr:', mbr);
+  console.log("🚀 ~ mbr:", mbr);
   return [err, mbr] as const;
 };
 
 export const sendEmailChangeCode = async (formData: FormData) => {
   const session = await auth();
-  if (!session?.user || !session.user.email) throw new Error('Need Login!');
+  if (!session?.user || !session.user.email) throw new Error("Need Login!");
 
   const { email, name } = session.user;
-  const mbr = await findMemberByEmail(email);
+  // const mbr = await findMemberByEmail(email);
 
   const zobj = z.object({
     newEmail: z.email(),
@@ -360,7 +360,7 @@ export const sendEmailChangeCode = async (formData: FormData) => {
   if (err) return err;
 
   const { newEmail } = data;
-  const existsErr = await existsEmail(newEmail, 'newEmail');
+  const existsErr = await existsEmail(newEmail, "newEmail");
   if (existsErr) return existsErr;
 
   const emailcheck = uniqNumId();
@@ -376,28 +376,28 @@ export const sendEmailChangeCode = async (formData: FormData) => {
         data: { emailcheck: null },
       });
     },
-    2 * 60 * 1000
+    2 * 60 * 1000,
   );
 
   await sendmailByFetch({
-    email,
+    email: newEmail,
     emailcheck,
-    nickname: name || '',
-    emailType: 'email-change-code',
+    nickname: name || "",
+    emailType: "email-change-code",
   });
 };
 
 export const updateEmail = async (formData: FormData) => {
   const session = await auth();
-  if (!session?.user || !session.user.email) throw new Error('Need Login!');
+  if (!session?.user || !session.user.email) throw new Error("Need Login!");
 
-  console.log('****>>', Object.fromEntries(formData.entries()));
+  console.log("****>>", Object.fromEntries(formData.entries()));
   const { email } = session.user;
   const mbr = await findMemberByEmail(email);
   if (!mbr || !mbr.emailcheck || mbr.emailcheck.length !== 5) {
     return [
       {
-        emailChangeCode: { errors: ['Invalid Code!'] },
+        emailChangeCode: { errors: ["Invalid Code!"] },
       } as ValidError,
       null,
     ] as const;
@@ -409,17 +409,74 @@ export const updateEmail = async (formData: FormData) => {
     emailChangeCode: z.literal(mbr.emailcheck),
   });
   const [err, data] = validate(zobj, formData);
-  console.log('🚀 ~ err:', err);
+  console.log("🚀 ~ err:", err);
   if (err) return [err, null] as const;
 
   const { newEmail } = data;
-  const existsErr = await existsEmail(newEmail, 'newEmail');
+  const existsErr = await existsEmail(newEmail, "newEmail");
   if (existsErr) return [existsErr, null] as const;
 
   const newMbr = await prisma.member.update({
     where: { email },
     data: { email: newEmail, emailcheck: null },
   });
-  console.log('🚀 ~ newMbr:', newMbr);
+  console.log("🚀 ~ newMbr:", newMbr);
   return [null, newMbr] as const;
+};
+
+export const updatePassword = async (formData: FormData) => {
+  const session = await auth();
+  if (!session?.user || !session.user.email) throw new Error("Need Login!");
+
+  console.log("****>>", Object.fromEntries(formData.entries()));
+  const { email } = session.user;
+  const mbr = await findMemberByEmail(email);
+
+  const zobj = z
+    .object({
+      curr_passwd: z.string().min(6).optional(),
+      passwd: z.string().min(6),
+      passwd2: z.string().min(6),
+    })
+    .superRefine(async ({ curr_passwd, passwd, passwd2 }, ctx) => {
+      let message: string = "";
+      let path: string[] = ["passwd2"];
+
+      const isMatchPassword = await comparePassword(
+        mbr?.passwd || "",
+        curr_passwd || "",
+      );
+      if (!isMatchPassword) {
+        message = "Not Match the current password!";
+        path = ["curr_passwd"];
+      } else if (!passwd || !passwd2) message = "Input the passwords!";
+      else if (passwd !== passwd2) message = "Not Match the password confirm!";
+
+      if (message) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message,
+          path,
+        });
+      }
+    });
+
+  const val = await zobj.parseAsync(formData);
+
+  const [err, data] = validate(zobj, formData);
+  console.log("🚀 ~ err data:", err, data);
+  if (err) return err;
+
+  const { newEmail, nickname, curr_passwd } = data;
+  if (mbr?.passwd && curr_passwd) {
+    const validCurrPasswd = await comparePassword(mbr?.passwd, curr_passwd);
+    if (!validCurrPasswd)
+      return {
+        ...dataErr,
+        curr_passwd: {
+          errors: ["Invalid current password!"],
+          value: curr_passwd,
+        },
+      };
+  }
 };

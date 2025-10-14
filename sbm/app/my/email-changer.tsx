@@ -1,11 +1,7 @@
 "use client";
 
-import LabelInput from "@/components/label-input";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import type { ValidError } from "@/lib/validator";
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import {
 	type ActionDispatch,
 	type FormEvent,
@@ -16,6 +12,10 @@ import {
 	useTransition,
 } from "react";
 import { flushSync } from "react-dom";
+import LabelInput from "@/components/label-input";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import type { ValidError } from "@/lib/validator";
 import { sendEmailChangeCode, updateEmail } from "../sign/sign.action";
 
 type Props = {
@@ -28,10 +28,11 @@ export default function EmailChanger({ email, toggleEditing }: Props) {
 	const router = useRouter();
 
 	const [diffEmail, setDiffEmail] = useState(false);
-	const [didSendCode, toggleSendCode] = useReducer((pre) => !pre, false); // QQQ: false
+	const [didSendCode, toggleSendCode] = useReducer((pre) => !pre, false);
 	const [validError, setValidError] = useState<ValidError>();
 
 	const formRef = useRef<HTMLFormElement>(null);
+	const codeRef = useRef<HTMLInputElement>(null);
 	const [submitType, setSubmitType] = useState<"sendmail" | "confirm">(
 		"sendmail",
 	);
@@ -46,15 +47,21 @@ export default function EmailChanger({ email, toggleEditing }: Props) {
 		startTransition(async () => {
 			if (submitType === "sendmail") {
 				const err = await sendEmailChangeCode(formData);
-				if (err) setValidError(err);
-				else toggleSendCode();
+				// if (err) setValidError(err);
+				// else toggleSendCode();
+				if (err) return setValidError(err);
+				setValidError(undefined);
+				if (!didSendCode) toggleSendCode();
 			} else if (submitType === "confirm") {
+				formData.set("emailChangeCode", codeRef.current?.value || "");
 				const [err, mbr] = await updateEmail(formData);
 
 				if (err) {
 					setValidError(err);
 				} else {
 					await update(mbr);
+					toggleEditing();
+					toggleSendCode();
 					router.refresh();
 				}
 			}
@@ -107,6 +114,7 @@ export default function EmailChanger({ email, toggleEditing }: Props) {
 						label="Email change code (until 2 min)"
 						type="text"
 						name="emailChangeCode"
+						ref={codeRef}
 						error={validError}
 						placeholder="input code..."
 					/>
