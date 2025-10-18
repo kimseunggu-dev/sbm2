@@ -91,6 +91,8 @@ export const {
         token.image = userData.image;
         token.isadmin = userData.isadmin;
       }
+
+      token.exp = Math.floor(Date.now() / 1000) + 10 * 60;
       return token;
     },
     async session({ session, token }) {
@@ -100,13 +102,14 @@ export const {
         session.user.email = token.email as string;
         session.user.image = token.image as string;
         session.user.isadmin = token.isadmin;
+        if (token.exp) session.expires = new Date(token.exp * 1000);
       }
       return session;
     },
   },
 
   trustHost: true,
-  jwt: { maxAge: 30 * 60 },
+  // jwt: { maxAge: 30 * 60 },
   pages: {
     signIn: `/sign`,
     error: "/sign/error",
