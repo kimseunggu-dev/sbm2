@@ -5,13 +5,11 @@ import { useRouter } from "next/navigation";
 import type { User } from "next-auth";
 import { useSession } from "next-auth/react";
 import { useReducer } from "react";
-// import { CheckLineIcon, UndoDotIcon } from "lucide-react";
 import LabelEditor from "@/components/label-editor";
-// import LabelInput from "@/components/label-input";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { updateNickname } from "../sign/sign.action";
 import EmailChanger from "./email-changer";
-// import PasswordChanger from './password-changer';
 import PasswordChanger from "./password-changer";
 
 type Props = {
@@ -41,8 +39,7 @@ export default function ChangeProfile({ user }: Props) {
 	};
 
 	return (
-		// <form className="space-y-3 text-left">
-		<div className="flex flex-col gap-7 text-left">
+		<div className="flex flex-col gap-5 text-left">
 			<LabelEditor
 				label="nickname"
 				name="nickname"
@@ -50,7 +47,7 @@ export default function ChangeProfile({ user }: Props) {
 				saveAction={changeNickname}
 			/>
 
-			<div className="w-96">
+			<div className={cn({ "w-[80%]": !isEditingEmail })}>
 				{isEditingEmail ? (
 					<EmailChanger email={user.email} toggleEditing={toggleEditingEmail} />
 				) : (
@@ -64,7 +61,7 @@ export default function ChangeProfile({ user }: Props) {
 				)}
 			</div>
 
-			<div className="w-96">
+			<div className={cn({ "w-[80%]": !isEditingEmail })}>
 				{isEditingPassword ? (
 					<PasswordChanger toggleEditing={toggleEditingPassword} />
 				) : (
