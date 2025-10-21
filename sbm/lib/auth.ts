@@ -8,6 +8,8 @@ import z from "zod";
 import prisma, { findMemberByEmail } from "./db";
 import { comparePassword, validateObject } from './validator';
 
+export const MAX_AGE = 30 * 60;
+
 export const {
   handlers: { GET, POST },
   auth,
@@ -16,7 +18,15 @@ export const {
 } = NextAuth({
   providers: [
     Github,
-    Google,
+    Google({
+      authorization: {
+        params: {
+          prompt: 'consent',
+          access_type: 'offline',
+          response_type: 'code',
+        },
+      },
+    }),
     Kakao,
     Naver,
     credentials({
@@ -51,6 +61,7 @@ export const {
       if (mbr?.emailcheck) {
         return `/sign/error?error=CheckEmail&email=${email}&Emailcheck=${mbr.emailcheck}`;
       }
+
       if (isCredential) {
         // 암호 비교(compare) ==> 실패하면 오류, 성공하면 로그인
         if (!mbr) throw authError("Not Exists Member!", "EmailSignInError");
@@ -102,7 +113,7 @@ export const {
         session.user.email = token.email as string;
         session.user.image = token.image as string;
         session.user.isadmin = token.isadmin;
-        if (token.exp) session.expires = new Date(token.exp * 1000);
+        // if (token.exp) session.expires = new Date(token.exp * 1000);
       }
       return session;
     },
@@ -110,13 +121,15 @@ export const {
 
   trustHost: true,
   // jwt: { maxAge: 30 * 60 },
-  jwt: { maxAge: 30 * 60 },
+  jwt: { maxAge: MAX_AGE },
   pages: {
     signIn: `/sign`,
     error: "/sign/error",
   },
   session: {
     strategy: "jwt",
+    maxAge: MAX_AGE, // default 1mon
+    // updateAge: 10 * 60, // 쿠키 굽는 단위 시간(10min)
   },
 });
 
