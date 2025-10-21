@@ -52,8 +52,10 @@ export const {
   callbacks: {
     async signIn({ user, profile, account }) {
       const isCredential = account?.provider === "credentials";
-      console.log(profile);
-      console.log(isCredential);
+      // console.log('🚀 ~ isCredential:', isCredential);
+      if (profile) console.log('🚀 ~ profile:', profile);
+      // console.log('🚀 ~ user:', user);
+      // console.log('🚀 ~ account:', account);
       const { email, name: nickname, image } = user;
       if (!email) return false;
 
